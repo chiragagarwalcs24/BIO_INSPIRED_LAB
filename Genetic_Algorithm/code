@@ -1,0 +1,107 @@
+import random
+
+# 1. Define the production function
+def production(x):
+    return x * (10 - x)
+
+
+# 2. GA Parameters
+POPULATION_SIZE = 10
+MUTATION_RATE = 0.1
+CROSSOVER_RATE = 0.8
+GENERATIONS = 20
+
+MIN_RESOURCE = 0
+MAX_RESOURCE = 10
+
+
+# 3. Create initial population
+population = []
+
+for i in range(POPULATION_SIZE):
+    population.append(random.uniform(MIN_RESOURCE, MAX_RESOURCE))
+
+
+# 4. Fitness function
+def fitness(x):
+    return production(x)
+
+
+# 5. Selection
+def selection(population):
+    parent1 = random.choice(population)
+    parent2 = random.choice(population)
+
+    if fitness(parent1) > fitness(parent2):
+        return parent1
+    else:
+        return parent2
+
+
+# 6. Crossover
+def crossover(parent1, parent2):
+
+    if random.random() < CROSSOVER_RATE:
+        alpha = random.random()
+
+        child1 = alpha * parent1 + (1 - alpha) * parent2
+        child2 = alpha * parent2 + (1 - alpha) * parent1
+
+        return child1, child2
+
+    return parent1, parent2
+
+
+# 7. Mutation
+def mutation(child):
+
+    if random.random() < MUTATION_RATE:
+        child += random.uniform(-1, 1)
+
+    child = max(MIN_RESOURCE, min(MAX_RESOURCE, child))
+
+    return child
+
+
+# 8. Run Genetic Algorithm
+
+for generation in range(GENERATIONS):
+
+    new_population = []
+
+    while len(new_population) < POPULATION_SIZE:
+
+        # Selection
+        parent1 = selection(population)
+        parent2 = selection(population)
+
+        # Crossover
+        child1, child2 = crossover(parent1, parent2)
+
+        # Mutation
+        child1 = mutation(child1)
+        child2 = mutation(child2)
+
+        new_population.append(child1)
+
+        if len(new_population) < POPULATION_SIZE:
+            new_population.append(child2)
+
+    # Replace old population
+    population = new_population
+
+    # Find best solution of this generation
+    best_solution = max(population, key=fitness)
+    best_fitness = fitness(best_solution)
+
+    # Print generation result
+    print(
+        "Generation:", generation + 1,
+        "| Best Solution:", round(best_solution, 2),
+        "| Fitness:", round(best_fitness, 2)
+    )
+
+
+# Final result
+print("\nFinal Best Solution:", round(best_solution, 2))
+print("Final Maximum Fitness:", round(best_fitness, 2))
