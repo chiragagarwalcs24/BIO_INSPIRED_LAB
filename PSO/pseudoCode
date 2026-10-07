@@ -1,0 +1,53 @@
+START
+
+Define production function:
+    Production(x) = 10*x - x²
+
+Set PSO parameters:
+    Number of particles = 10
+    Number of iterations = 20
+    Inertia weight = 0.5
+    Cognitive coefficient = 1.5
+    Social coefficient = 1.5
+
+Initialize each particle:
+    Generate random position between 0 and 10
+    Generate random velocity
+    Set personal best position = current position
+    Calculate personal best fitness
+
+Find the global best particle
+
+FOR each iteration:
+
+    FOR each particle:
+
+        Generate random values r1 and r2
+
+        Update velocity:
+            velocity =
+                inertia × velocity
+                + cognitive × r1 × (personal best - position)
+                + social × r2 × (global best - position)
+
+        Update position:
+            position = position + velocity
+
+        Keep position between 0 and 10
+
+        Calculate current production
+
+        IF current production > personal best production:
+            Update personal best
+
+        IF current production > global best production:
+            Update global best
+
+    END FOR
+
+END FOR
+
+Display global best position
+Display global best production
+
+STOP
