@@ -1,0 +1,46 @@
+START
+
+1. Define the production function:
+       f(x) = x × (10 - x)
+
+2. Set GA parameters:
+       Population size = 10
+       Mutation rate = 0.1
+       Crossover rate = 0.8
+       Number of generations = 20
+       Resource range = 0 to 10
+
+3. Create an initial population
+       Generate 10 random resource values between 0 and 10
+
+4. Calculate fitness
+       Fitness = f(x)
+
+5. Repeat for each generation:
+
+       a. Select two parents
+          Choose the better individuals based on fitness
+
+       b. Perform crossover
+          Combine the two parents to create children
+
+       c. Perform mutation
+          Randomly change the children's resource values
+
+       d. Keep values within 0 to 10
+
+       e. Create the new population
+
+       f. Find the best solution
+          Select the individual with maximum fitness
+
+       g. Display:
+          Generation
+          Best solution
+          Fitness
+
+6. After all generations:
+       Display the final best resource allocation
+       Display the maximum production
+
+STOP
