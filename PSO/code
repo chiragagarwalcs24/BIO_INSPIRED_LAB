@@ -1,0 +1,87 @@
+import random
+
+# 1. Define the production function
+def production(x):
+    return 10 * x - x ** 2
+
+
+# 2. PSO Parameters
+NUM_PARTICLES = 10
+ITERATIONS = 20
+
+w = 0.5      # Inertia weight
+c1 = 1.5     # Cognitive coefficient
+c2 = 1.5     # Social coefficient
+
+MIN_RESOURCE = 0
+MAX_RESOURCE = 10
+
+
+# 3. Initialize particles
+particles = []
+
+for i in range(NUM_PARTICLES):
+
+    position = random.uniform(MIN_RESOURCE, MAX_RESOURCE)
+    velocity = random.uniform(-1, 1)
+
+    particles.append({
+        "position": position,
+        "velocity": velocity,
+        "best_position": position,
+        "best_fitness": production(position)
+    })
+
+
+# Find the initial global best
+global_best_position = particles[0]["best_position"]
+global_best_fitness = particles[0]["best_fitness"]
+
+for particle in particles:
+    if particle["best_fitness"] > global_best_fitness:
+        global_best_fitness = particle["best_fitness"]
+        global_best_position = particle["best_position"]
+
+
+# 4-6. Run PSO
+for iteration in range(ITERATIONS):
+
+    for particle in particles:
+
+        r1 = random.random()
+        r2 = random.random()
+
+        # Update velocity
+        particle["velocity"] = (
+            w * particle["velocity"]
+            + c1 * r1 * (particle["best_position"] - particle["position"])
+            + c2 * r2 * (global_best_position - particle["position"])
+        )
+
+        # Update position
+        particle["position"] += particle["velocity"]
+
+        # Keep resource within limits
+        if particle["position"] < MIN_RESOURCE:
+            particle["position"] = MIN_RESOURCE
+
+        if particle["position"] > MAX_RESOURCE:
+            particle["position"] = MAX_RESOURCE
+
+        # Calculate production
+        current_fitness = production(particle["position"])
+
+        # Update personal best
+        if current_fitness > particle["best_fitness"]:
+            particle["best_fitness"] = current_fitness
+            particle["best_position"] = particle["position"]
+
+        # Update global best
+        if current_fitness > global_best_fitness:
+            global_best_fitness = current_fitness
+            global_best_position = particle["position"]
+
+
+# 7. Output result
+print("Best Resource Allocation:", round(global_best_position, 2))
+print("Maximum Production:", round(global_best_fitness, 2))
