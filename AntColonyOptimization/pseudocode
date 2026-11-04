@@ -1,0 +1,69 @@
+BEGIN
+
+    INPUT two DNA sequences S1 and S2
+
+    INITIALIZE:
+        Number of ants
+        Number of iterations
+        Alpha, Beta, Rho
+        Initial pheromone
+        Match reward
+        Mismatch penalty
+        Gap penalty
+
+    INITIALIZE pheromone matrix
+
+    best_score = -INFINITY
+
+    FOR iteration = 1 TO maximum_iterations
+
+        FOR each ant
+
+            i = 0
+            j = 0
+            score = 0
+            alignment1 = empty
+            alignment2 = empty
+
+            WHILE i < length(S1) OR j < length(S2)
+
+                Generate valid moves:
+                    1. Align S1[i] with S2[j]
+                    2. Align S1[i] with a gap
+                    3. Align a gap with S2[j]
+
+                Calculate probability of each move
+                using pheromone and heuristic information
+
+                Randomly select a move based on probability
+
+                Update alignment and score
+
+            END WHILE
+
+            IF score > best_score
+                best_score = score
+                Store best alignment
+            END IF
+
+            Store ant solution
+
+        END FOR
+
+        EVAPORATE pheromone trails
+
+        FOR each ant solution
+
+            Calculate pheromone deposit based on
+            alignment quality
+
+            Update pheromone trails
+
+        END FOR
+
+    END FOR
+
+    DISPLAY best alignment
+    DISPLAY best alignment score
+
+END
