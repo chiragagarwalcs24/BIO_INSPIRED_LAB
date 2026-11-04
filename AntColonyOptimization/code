@@ -1,0 +1,195 @@
+
+import random
+import math
+
+# DNA sequences
+seq1 = "ATGCAT"
+seq2 = "ATCCAT"
+
+# ACO Parameters
+NUM_ANTS = 20
+ITERATIONS = 100
+ALPHA = 1
+BETA = 2
+RHO = 0.1
+Q = 10
+
+INITIAL_PHEROMONE = 1.0
+
+# Scoring parameters
+MATCH = 2
+MISMATCH = -1
+GAP = -2
+
+random.seed(42)
+
+n = len(seq1)
+m = len(seq2)
+
+# Three possible moves:
+# 0 = Align both nucleotides
+# 1 = Nucleotide from sequence 1 with gap
+# 2 = Gap with nucleotide from sequence 2
+
+pheromone = [
+    [[INITIAL_PHEROMONE] * 3 for _ in range(m + 1)]
+    for _ in range(n + 1)
+]
+
+
+# Calculate heuristic information
+def heuristic(i, j, move):
+
+    if move == 0:
+        score = MATCH if seq1[i] == seq2[j] else MISMATCH
+        return math.exp(score / 2)
+
+    elif move == 1:
+        return math.exp(GAP / 2)
+
+    else:
+        return math.exp(GAP / 2)
+
+
+# Construct one alignment using an ant
+def construct_solution():
+
+    i, j = 0, 0
+
+    alignment1 = ""
+    alignment2 = ""
+
+    route = []
+    score = 0
+
+    while i < n or j < m:
+
+        moves = []
+
+        if i < n and j < m:
+            moves.append(0)
+
+        if i < n:
+            moves.append(1)
+
+        if j < m:
+            moves.append(2)
+
+        weights = []
+
+        for move in moves:
+
+            h = heuristic(i, j, move)
+
+            weight = (
+                pheromone[i][j][move] ** ALPHA
+                * h ** BETA
+            )
+
+            weights.append(weight)
+
+        # Select move probabilistically
+        move = random.choices(
+            moves,
+            weights=weights,
+            k=1
+        )[0]
+
+        route.append((i, j, move))
+
+        if move == 0:
+
+            alignment1 += seq1[i]
+            alignment2 += seq2[j]
+
+            if seq1[i] == seq2[j]:
+                score += MATCH
+            else:
+                score += MISMATCH
+
+            i += 1
+            j += 1
+
+        elif move == 1:
+
+            alignment1 += seq1[i]
+            alignment2 += "-"
+
+            score += GAP
+            i += 1
+
+        else:
+
+            alignment1 += "-"
+            alignment2 += seq2[j]
+
+            score += GAP
+            j += 1
+
+    return alignment1, alignment2, route, score
+
+
+# Store the best solution
+best_score = float("-inf")
+best_alignment = None
+best_route = None
+
+# Main ACO algorithm
+for iteration in range(ITERATIONS):
+
+    solutions = []
+
+    # Each ant constructs an alignment
+    for ant in range(NUM_ANTS):
+
+        a1, a2, route, score = construct_solution()
+
+        solutions.append((a1, a2, route, score))
+
+        if score > best_score:
+
+            best_score = score
+            best_alignment = (a1, a2)
+            best_route = route
+
+    # Pheromone evaporation
+    for i in range(n + 1):
+        for j in range(m + 1):
+            for move in range(3):
+
+                pheromone[i][j][move] *= (1 - RHO)
+
+    # Pheromone deposition
+    iteration_best = max(
+        solution[3] for solution in solutions
+    )
+
+    for a1, a2, route, score in solutions:
+
+        # Better alignments deposit more pheromone
+        deposit = Q / (1 + iteration_best - score)
+
+        for i, j, move in route:
+
+            pheromone[i][j][move] += deposit
+
+    # Elitist reinforcement of global best
+    for i, j, move in best_route:
+
+        pheromone[i][j][move] += Q
+
+
+# Display result
+print("\nDNA SEQUENCE ALIGNMENT USING ACO")
+print("--------------------------------")
+
+print("Original Sequence 1:", seq1)
+print("Original Sequence 2:", seq2)
+
+print("\nBest Alignment:")
+print("Sequence 1:", best_alignment[0])
+print("Sequence 2:", best_alignment[1])
+
+print("\nBest Alignment Score:", best_score)
+print("Total Iterations:", ITERATIONS)
+print("Number of Ants:", NUM_ANTS)
