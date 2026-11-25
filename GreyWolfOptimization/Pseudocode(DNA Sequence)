@@ -1,0 +1,72 @@
+BEGIN
+
+1. Input two DNA sequences S1 and S2.
+
+2. Define scoring parameters:
+      Match = +2
+      Mismatch = -1
+      Gap = -2
+
+3. Initialize parameters:
+      N = Number of wolves
+      T = Maximum iterations
+      a = 2
+
+4. Initialize population:
+      Generate N random wolf positions.
+
+      Each wolf represents a possible DNA alignment.
+
+5. Evaluate fitness:
+      Calculate alignment score of each wolf.
+
+6. Identify the three best wolves:
+      Alpha = Best wolf
+      Beta  = Second-best wolf
+      Delta = Third-best wolf
+
+7. FOR iteration = 1 TO T DO
+
+      Update control parameter:
+          a = 2 - (2 * iteration / T)
+
+      FOR each wolf Xi DO
+
+          Calculate:
+              A1 = 2 * a * r1 - a
+              C1 = 2 * r2
+
+              A2 = 2 * a * r3 - a
+              C2 = 2 * r4
+
+              A3 = 2 * a * r5 - a
+              C3 = 2 * r6
+
+          Calculate distances:
+              D_alpha = |C1 * Alpha - Xi|
+              D_beta  = |C2 * Beta - Xi|
+              D_delta = |C3 * Delta - Xi|
+
+          Calculate new positions:
+              X1 = Alpha - A1 * D_alpha
+              X2 = Beta - A2 * D_beta
+              X3 = Delta - A3 * D_delta
+
+          Update wolf position:
+              Xi = (X1 + X2 + X3) / 3
+
+          Convert position into valid DNA alignment.
+
+      END FOR
+
+      Evaluate fitness of all wolves.
+
+      Update Alpha, Beta and Delta.
+
+8. END FOR
+
+9. Output:
+      Best DNA alignment
+      Best alignment score
+
+END
