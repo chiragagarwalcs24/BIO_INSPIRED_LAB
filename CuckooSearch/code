@@ -1,0 +1,147 @@
+
+import random
+import math
+
+# Input DNA sequences
+S1 = "ATGCAT"
+S2 = "ATCCAT"
+
+# Scoring parameters
+MATCH = 2
+MISMATCH = -1
+GAP = -2
+
+# Cuckoo Search parameters
+N = 20
+Pa = 0.25
+iterations = 100
+alpha = 1.0
+beta = 1.5
+
+# Search space for alignment offset
+MIN_OFFSET = -(len(S2) - 1)
+MAX_OFFSET = len(S1) - 1
+
+
+# Generate Levy flight step using Mantegna's algorithm
+def levy_flight(beta):
+    sigma = (
+        math.gamma(1 + beta) * math.sin(math.pi * beta / 2)
+        / (
+            math.gamma((1 + beta) / 2)
+            * beta
+            * 2 ** ((beta - 1) / 2)
+        )
+    ) ** (1 / beta)
+
+    u = random.gauss(0, sigma)
+    v = random.gauss(0, 1)
+
+    return u / (abs(v) ** (1 / beta) + 1e-10)
+
+
+# Convert offset into DNA alignment
+def get_alignment(offset):
+    offset = max(MIN_OFFSET, min(MAX_OFFSET, round(offset)))
+
+    start = min(0, offset)
+    end = max(len(S1), offset + len(S2))
+
+    aligned1 = ""
+    aligned2 = ""
+
+    for pos in range(start, end):
+
+        i = pos
+        j = pos - offset
+
+        c1 = S1[i] if 0 <= i < len(S1) else "-"
+        c2 = S2[j] if 0 <= j < len(S2) else "-"
+
+        aligned1 += c1
+        aligned2 += c2
+
+    return aligned1, aligned2
+
+
+# Calculate alignment fitness
+def fitness(offset):
+    a1, a2 = get_alignment(offset)
+
+    score = 0
+
+    for x, y in zip(a1, a2):
+
+        if x == "-" or y == "-":
+            score += GAP
+
+        elif x == y:
+            score += MATCH
+
+        else:
+            score += MISMATCH
+
+    return score
+
+
+# Initialize nests randomly
+nests = [
+    random.uniform(MIN_OFFSET, MAX_OFFSET)
+    for _ in range(N)
+]
+
+best_nest = max(nests, key=fitness)
+best_score = fitness(best_nest)
+
+
+# Main Cuckoo Search algorithm
+for iteration in range(iterations):
+
+    for i in range(N):
+
+        # Generate new solution using Levy flight
+        step = levy_flight(beta)
+
+        new_nest = nests[i] + alpha * step
+
+        new_nest = max(
+            MIN_OFFSET,
+            min(MAX_OFFSET, new_nest)
+        )
+
+        # Select a random nest
+        j = random.randrange(N)
+
+        # Replace nest if new solution is better
+        if fitness(new_nest) > fitness(nests[j]):
+            nests[j] = new_nest
+
+    # Abandon worst nests
+    abandon_count = max(1, int(Pa * N))
+
+    nests.sort(key=fitness)
+
+    for i in range(abandon_count):
+        nests[i] = random.uniform(MIN_OFFSET, MAX_OFFSET)
+
+    # Update best solution
+    current_best = max(nests, key=fitness)
+
+    if fitness(current_best) > best_score:
+        best_nest = current_best
+        best_score = fitness(current_best)
+
+
+# Display results
+a1, a2 = get_alignment(best_nest)
+
+print("Original Sequence 1:", S1)
+print("Original Sequence 2:", S2)
+
+print("\nBest DNA Alignment:")
+print(a1)
+print(a2)
+
+print("\nBest Alignment Score:", best_score)
+print("Total Iterations:", iterations)
+print("Number of Nests:", N)
