@@ -1,0 +1,58 @@
+BEGIN
+
+1. Input two DNA sequences S1 and S2.
+
+2. Define scoring parameters:
+      Match = +2
+      Mismatch = -1
+      Gap = -2
+
+3. Initialize parameters:
+      N = Number of nests
+      Pa = Probability of discovery
+      T = Maximum iterations
+
+4. Initialize N nests randomly.
+      Each nest represents a possible alignment offset.
+
+5. Evaluate fitness:
+      Calculate alignment score of each nest.
+
+6. Identify the best nest.
+
+7. FOR iteration = 1 TO T DO
+
+      FOR each nest Xi DO
+
+          Generate a new solution using Lévy flight:
+
+              Xnew = Xi + α * Lévy(λ)
+
+          Convert new solution into a valid alignment offset.
+
+          Calculate the alignment score of Xnew.
+
+          Select a random nest Xj.
+
+          IF fitness(Xnew) > fitness(Xj) THEN
+              Replace Xj with Xnew
+          END IF
+
+      END FOR
+
+      Abandon worst nests based on probability Pa.
+
+      Generate new random nests to replace them.
+
+      Evaluate fitness of all nests.
+
+      Update the best nest.
+
+8. END FOR
+
+9. Display:
+      Best DNA alignment
+      Best alignment score
+      Number of iterations
+
+END
