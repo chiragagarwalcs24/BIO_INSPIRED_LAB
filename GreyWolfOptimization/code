@@ -1,0 +1,150 @@
+
+import random
+
+# Input DNA sequences
+S1 = "ATGCAT"
+S2 = "ATCCAT"
+
+# Scoring parameters
+MATCH = 2
+MISMATCH = -1
+GAP = -2
+
+# GWO parameters
+N = 20
+iterations = 100
+
+# Search space for alignment offset
+MIN_OFFSET = -(len(S2) - 1)
+MAX_OFFSET = len(S1) - 1
+
+
+# Generate DNA alignment using offset
+def get_alignment(offset):
+
+    offset = round(offset)
+    offset = max(MIN_OFFSET, min(MAX_OFFSET, offset))
+
+    start = min(0, offset)
+    end = max(len(S1), offset + len(S2))
+
+    aligned1 = ""
+    aligned2 = ""
+
+    for pos in range(start, end):
+
+        i = pos
+        j = pos - offset
+
+        c1 = S1[i] if 0 <= i < len(S1) else "-"
+        c2 = S2[j] if 0 <= j < len(S2) else "-"
+
+        aligned1 += c1
+        aligned2 += c2
+
+    return aligned1, aligned2
+
+
+# Calculate fitness score
+def fitness(position):
+
+    a1, a2 = get_alignment(position)
+
+    score = 0
+
+    for x, y in zip(a1, a2):
+
+        if x == "-" or y == "-":
+            score += GAP
+
+        elif x == y:
+            score += MATCH
+
+        else:
+            score += MISMATCH
+
+    return score
+
+
+# Initialize wolf population
+wolves = [
+    random.uniform(MIN_OFFSET, MAX_OFFSET)
+    for _ in range(N)
+]
+
+
+# Main GWO algorithm
+for iteration in range(iterations):
+
+    # Sort wolves according to fitness
+    wolves.sort(key=fitness, reverse=True)
+
+    # Identify Alpha, Beta and Delta
+    alpha = wolves[0]
+    beta = wolves[1]
+    delta = wolves[2]
+
+    # Decrease parameter a from 2 to 0
+    a = 2 - (2 * iteration / iterations)
+
+    new_wolves = []
+
+    # Update positions of all wolves
+    for X in wolves:
+
+        r1 = random.random()
+        r2 = random.random()
+        A1 = 2 * a * r1 - a
+        C1 = 2 * r2
+        D_alpha = abs(C1 * alpha - X)
+        X1 = alpha - A1 * D_alpha
+
+        r1 = random.random()
+        r2 = random.random()
+        A2 = 2 * a * r1 - a
+        C2 = 2 * r2
+        D_beta = abs(C2 * beta - X)
+        X2 = beta - A2 * D_beta
+
+        r1 = random.random()
+        r2 = random.random()
+        A3 = 2 * a * r1 - a
+        C3 = 2 * r2
+        D_delta = abs(C3 * delta - X)
+        X3 = delta - A3 * D_delta
+
+        # Calculate new wolf position
+        new_position = (X1 + X2 + X3) / 3
+
+        # Keep position within search space
+        new_position = max(
+            MIN_OFFSET,
+            min(MAX_OFFSET, new_position)
+        )
+
+        new_wolves.append(new_position)
+
+    wolves = new_wolves
+
+
+# Find best wolf
+wolves.sort(key=fitness, reverse=True)
+
+best_wolf = wolves[0]
+best_score = fitness(best_wolf)
+
+# Get best DNA alignment
+a1, a2 = get_alignment(best_wolf)
+
+
+# Display results
+print("Original Sequence 1:", S1)
+print("Original Sequence 2:", S2)
+
+print("\nBest DNA Alignment:")
+print(a1)
+print(a2)
+
+print("\nBest Alignment Score:", best_score)
+print("Total Iterations:", iterations)
+print("Number of Wolves:", N)
